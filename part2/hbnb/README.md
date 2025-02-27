@@ -6,26 +6,26 @@ book places, leave and read reviews, and interact with amenities.
 
 ## `Project structure and description`
 
-#### `𝑎𝑝𝑖/` : Contains the API endpoints for the application, API routes like users, places, reviews, and amenities are handled here
-#### `𝘷１/` : Contains version 1 of the API endpoints
+#### * `𝑎𝑝𝑖/` : Contains the API endpoints for the application, API routes like users, places, reviews, and amenities are handled here
+#### * `𝘷１/` : Contains version 1 of the API endpoints
 #### `𝑢𝑠𝑒𝑟𝑠.𝑝𝑦` : Contains the API routes for managing user-related actions like registration, authentication, and profile updates.
 #### `𝑝𝑙𝑎𝑐𝑒𝑠.𝑝𝑦` : Handles API endpoints related to places, such as creating, updating, and fetching place information.
 #### `𝑟𝑒𝑣𝑖𝑒𝑤𝑠.𝑝𝑦` : Contains API routes for managing reviews of places, such as creating, deleting, and viewing reviews.
 #### `𝑎𝑚𝑒𝑛𝑖𝑡𝑖𝑒𝑠.𝑝𝑦` : Handles API endpoints for managing amenities associated with places, like adding and fetching amenities.
 
 
-#### `𝑚𝑜𝑑𝑒𝑙𝑠/` : Contains the application's business logic and object models
+#### * `𝑚𝑜𝑑𝑒𝑙𝑠/` : Contains the application's business logic and object models
 #### `𝑏𝑎𝑠𝑒_𝑚𝑜𝑑𝑒𝑙.𝑝𝑦` : Defines a base class with common attributes (id, created_at, updated_at)
 #### `𝑢𝑠𝑒𝑟.𝑝𝑦` : Handles the user model
 #### `𝑝𝑙𝑎𝑐𝑒.𝑝𝑦` : Handles the place model (properties, locations)
 #### `𝑟𝑒𝑣𝑖𝑒𝑤.𝑝𝑦` : Handles user reviews for places
 
 
-#### `𝑝𝑒𝑟𝑠𝑖𝑠𝑡𝑒𝑛𝑐𝑒/` : Manages data storage and database interactions
+#### * `𝑝𝑒𝑟𝑠𝑖𝑠𝑡𝑒𝑛𝑐𝑒/` : Manages data storage and database interactions
 #### `𝑟𝑒𝑝𝑜𝑠𝑖𝑡𝑜𝑟𝑦.𝑝𝑦` : Defines the repository pattern for managing and storing data, like users, places, reviews, etc
 
 
-#### `𝑠𝑒𝑟𝑣𝑖𝑐𝑒𝑠/` : Implements the Facade pattern, simplifying interaction between different layers of the application
+#### * `𝑠𝑒𝑟𝑣𝑖𝑐𝑒𝑠/` : Implements the Facade pattern, simplifying interaction between different layers of the application
 #### `𝑓𝑎𝑐𝑎𝑑𝑒.𝑝𝑦` : Implements the Facade pattern, simplifying interaction between different layers of the application
 
 
