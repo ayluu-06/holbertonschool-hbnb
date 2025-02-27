@@ -6,7 +6,7 @@ book places, leave and read reviews, and interact with amenities.
 #
 ## `Project structure and description`
 #
-##### **`𝑎𝑝𝑖/`** : Contains the API endpoints for the application, API routes like users, places, reviews, and amenities are handled here
+##### `_𝑎𝑝𝑖/_` : Contains the API endpoints for the application, API routes like users, places, reviews, and amenities are handled here
 ##### `𝘷１/` : Contains version 1 of the API endpoints
 ##### `𝑢𝑠𝑒𝑟𝑠.𝑝𝑦` : Contains the API routes for managing user-related actions like registration, authentication, and profile updates.
 ##### `𝑝𝑙𝑎𝑐𝑒𝑠.𝑝𝑦` : Handles API endpoints related to places, such as creating, updating, and fetching place information.
