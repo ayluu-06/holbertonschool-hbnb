@@ -5,7 +5,7 @@ The project consist in developing a program  where an user can  list and
 book places, leave and read reviews, and interact with amenities.  
 #
 ## `Project structure and description`
-#
+
 - `𝑎𝑝𝑖/` : Contains the API endpoints for the application, API routes like users, places, reviews, and amenities are handled here
 - `𝘷１/` : Contains version 1 of the API endpoints
 - `𝑢𝑠𝑒𝑟𝑠.𝑝𝑦` : Contains the API routes for managing user-related actions like registration, authentication, and profile updates.
@@ -40,8 +40,8 @@ book places, leave and read reviews, and interact with amenities.
 #
 ### Entities and Relationships
 
-## User Class
-### Attributes:
+### `User Class`
+#### Attributes:
  - `id`: Unique identifier (UUID)
  - `first_name`: First name of the user (max length 50 characters)
  - `last_name`: Last name of the user (max length 50 characters)
@@ -54,8 +54,8 @@ book places, leave and read reviews, and interact with amenities.
  - Manages user information
  - Allows for the creation of users and validation of unique emails
 #
-## Place Class
-### Attributes:
+### `Place Class`
+#### Attributes:
  - `id`: Unique identifier (UUID)
  - `title`: Title of the place (max length 100 characters)
  - `description`: Detailed description of the place (optional)
@@ -71,8 +71,8 @@ book places, leave and read reviews, and interact with amenities.
  - A **Place** can have multiple **Review** instances (one-to-many relationship)
  - A **Place** can have multiple **Amenity** instances (many-to-many relationship)
 #
-## Review Class
-### Attributes:
+### `Review Class`
+#### Attributes:
  - `id`: Unique identifier (UUID)
  - `text`: Content of the review (required)
  - `rating`: Rating of the place (integer between 1 and 5)
@@ -84,8 +84,8 @@ book places, leave and read reviews, and interact with amenities.
 #### Relationships:
  - A **Review** is tied to a specific **Place** and written by a specific **User**
 #
-## Amenity Class
-### Attributes:
+### `Amenity Class`
+#### Attributes:
  - `id`: Unique identifier (UUID)
  - `name`: Name of the amenity (e.g., "Wi-Fi", "Parking")
  - `created_at`: Timestamp when the amenity is created
