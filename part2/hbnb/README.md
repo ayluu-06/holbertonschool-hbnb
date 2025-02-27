@@ -32,13 +32,13 @@ book places, leave and read reviews, and interact with amenities.
 #
 #
 ## `Business Logic Layer`
-#
+
 - **User**: Represents a user in the system.
 - **Place**: Represents a place that can be booked by users.
 - **Review**: Represents a review written by a user for a specific place.
 - **Amenity**: Represents amenities associated with a place (e.g., Wi-Fi, Parking).
 #
-### Entities and Relationships
+## Entities and Relationships
 
 ### `User Class`
 #### Attributes:
