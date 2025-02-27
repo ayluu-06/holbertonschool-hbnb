@@ -47,9 +47,9 @@ book places, leave and read reviews, and interact with amenities.
 - **Amenity**: Represents amenities associated with a place (e.g., Wi-Fi, Parking).
 #
 ### Entities and Relationships
-#
+
 **User Class**
-### - Attributes:
+### Attributes:
  - `id`: Unique identifier (UUID)
  - `first_name`: First name of the user (max length 50 characters)
  - `last_name`: Last name of the user (max length 50 characters)
@@ -57,13 +57,13 @@ book places, leave and read reviews, and interact with amenities.
  - `is_admin`: Boolean indicating if the user has admin privileges
  - `created_at`: Timestamp when the user is created
  - `updated_at`: Timestamp when the user is last updated
-#
-#### - Responsibilities:
+
+#### Responsibilities:
  - Manages user information
  - Allows for the creation of users and validation of unique emails
 #
 **Place Class**
-### - Attributes:
+### Attributes:
  - `id`: Unique identifier (UUID)
  - `title`: Title of the place (max length 100 characters)
  - `description`: Detailed description of the place (optional)
@@ -73,14 +73,14 @@ book places, leave and read reviews, and interact with amenities.
  - `owner`: Reference to the User who owns the place
  - `created_at`: Timestamp when the place is created
  - `updated_at`: Timestamp when the place is last updated
-#
-#### - Relationships:
+
+#### Relationships:
  - A **User** can own multiple **Place** instances (one-to-many relationship)
  - A **Place** can have multiple **Review** instances (one-to-many relationship)
  - A **Place** can have multiple **Amenity** instances (many-to-many relationship)
 #
 **Review Class**
-### - Attributes:
+### Attributes:
  - `id`: Unique identifier (UUID)
  - `text`: Content of the review (required)
  - `rating`: Rating of the place (integer between 1 and 5)
@@ -88,16 +88,16 @@ book places, leave and read reviews, and interact with amenities.
  - `user`: Reference to the **User** who wrote the review
  - `created_at`: Timestamp when the review is created
  - `updated_at`: Timestamp when the review is last updated
-#
-#### - Relationships:
+
+#### Relationships:
  - A **Review** is tied to a specific **Place** and written by a specific **User**
 #
 **Amenity Class**
-### - Attributes:
+### Attributes:
  - `id`: Unique identifier (UUID)
  - `name`: Name of the amenity (e.g., "Wi-Fi", "Parking")
  - `created_at`: Timestamp when the amenity is created
  - `updated_at`: Timestamp when the amenity is last updated
-#
-#### - Relationships:
+
+#### Relationships:
  - A **Place** can have multiple **Amenity** instances, creating a many-to-many relationship
