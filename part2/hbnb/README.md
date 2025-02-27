@@ -31,15 +31,7 @@ book places, leave and read reviews, and interact with amenities.
 - `𝑅𝐸𝐴𝐷𝑀𝐸.𝑚𝑑` : contains a brief overview of the project
 #
 #
-## `Installation`
-#
-#### Install the dependencies using:
-*pip install -r requirements.txt*
-#
-#### Run the application to ensure everything is set up correctly:
-*python run.py*
-#
-## Business Logic Layer
+## `Business Logic Layer`
 #
 - **User**: Represents a user in the system.
 - **Place**: Represents a place that can be booked by users.
@@ -48,7 +40,7 @@ book places, leave and read reviews, and interact with amenities.
 #
 ### Entities and Relationships
 
-**User Class**
+## User Class
 ### Attributes:
  - `id`: Unique identifier (UUID)
  - `first_name`: First name of the user (max length 50 characters)
@@ -62,7 +54,7 @@ book places, leave and read reviews, and interact with amenities.
  - Manages user information
  - Allows for the creation of users and validation of unique emails
 #
-**Place Class**
+## Place Class
 ### Attributes:
  - `id`: Unique identifier (UUID)
  - `title`: Title of the place (max length 100 characters)
@@ -79,7 +71,7 @@ book places, leave and read reviews, and interact with amenities.
  - A **Place** can have multiple **Review** instances (one-to-many relationship)
  - A **Place** can have multiple **Amenity** instances (many-to-many relationship)
 #
-**Review Class**
+## Review Class
 ### Attributes:
  - `id`: Unique identifier (UUID)
  - `text`: Content of the review (required)
@@ -92,7 +84,7 @@ book places, leave and read reviews, and interact with amenities.
 #### Relationships:
  - A **Review** is tied to a specific **Place** and written by a specific **User**
 #
-**Amenity Class**
+## Amenity Class
 ### Attributes:
  - `id`: Unique identifier (UUID)
  - `name`: Name of the amenity (e.g., "Wi-Fi", "Parking")
@@ -101,3 +93,12 @@ book places, leave and read reviews, and interact with amenities.
 
 #### Relationships:
  - A **Place** can have multiple **Amenity** instances, creating a many-to-many relationship
+#
+## `Installation`
+#
+#### Install the dependencies using:
+*pip install -r requirements.txt*
+#
+#### Run the application to ensure everything is set up correctly:
+*python run.py*
+#
