@@ -2,9 +2,9 @@
 
 echo "Creando usuario..."
 curl -s -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{
-    "first_name": "Brahian",
-    "last_name": "Amaral",
-    "email": "brahian@example.com"
+    "first_name": "Roberto",
+    "last_name": "Gonzales",
+    "email": "roberto@example.com"
 }' | jq
 
 echo ""
