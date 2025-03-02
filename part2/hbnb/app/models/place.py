@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-BaseModel = __import__('base_model.py').BaseModel
+from app.models.base_model import BaseModel
 
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner):
