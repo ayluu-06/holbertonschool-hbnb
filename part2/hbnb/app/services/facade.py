@@ -22,13 +22,21 @@ class HBnBFacade:
         email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         if not re.match(email_regex, user_data.get("email", "")):
             raise ValueError("Invalid email format.")
+        
+        existing_user = self.get_user_by_email(user_data.get("email"))
+        if existing_user:
+            raise ValueError("Email already registered")
 
         # Crear usuario solo si las validaciones pasan
         user = User(**user_data)
         self.user_repo.add(user)
         return user
+    
     def get_user_by_email(self, email):
-        return User.query.filter_by(email=email).first()
+        return self.user_repo.get_by_attribute('email', email)
+    
+    def get_all_users(self):
+        return self.user_repo.get_all()
     
 # 🏨 Amenities
     

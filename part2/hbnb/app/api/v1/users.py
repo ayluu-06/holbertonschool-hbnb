@@ -20,7 +20,7 @@ class UserList(Resource):
         """Registrar un nuevo usuario"""
         user_data = api.payload
 
-        # Simulación de verificación de email único (debe ser reemplazado por validación real)
+        # Simulación de verificación de email único
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             return {'error': 'Correo ya registrado'}, 400
@@ -32,6 +32,17 @@ class UserList(Resource):
             'last_name': new_user.last_name,
             'email': new_user.email
         }, 201
+
+    @api.response(200, 'Lista de usuarios obtenida correctamente')
+    @api.response(500, 'Error interno del servidor')
+    def get(self):
+        """Obtener todos los usuarios"""
+        try:
+            # Método que devuelve todos los usuarios
+            users = facade.get_all_users()  
+            return [{'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email} for user in users], 200
+        except Exception as e:
+            return {'error': 'Error en el servidor', 'message': str(e)}, 500
 
 @api.route('/<user_id>')
 class UserResource(Resource):
