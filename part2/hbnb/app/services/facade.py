@@ -1,3 +1,4 @@
+import re
 from app.persistence.repository import InMemoryRepository
 from app.models.user import User
 from app.models.amenity import Amenity
@@ -13,15 +14,21 @@ class HBnBFacade:
 
 # 👨 users
     def create_user(self, user_data):
+        # Validar que first_name y last_name no estén vacíos
+        if not user_data.get("first_name") or not user_data.get("last_name"):
+            raise ValueError("First name and last name are required.")
+
+        # Validar formato del email
+        email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(email_regex, user_data.get("email", "")):
+            raise ValueError("Invalid email format.")
+
+        # Crear usuario solo si las validaciones pasan
         user = User(**user_data)
         self.user_repo.add(user)
         return user
-
-    def get_user(self, user_id):
-        return self.user_repo.get(user_id)
-
     def get_user_by_email(self, email):
-        return self.user_repo.get_by_attribute('email', email)
+        return User.query.filter_by(email=email).first()
     
 # 🏨 Amenities
     
@@ -31,7 +38,11 @@ class HBnBFacade:
         return amenity
 
     def get_amenity(self, amenity_id):
-        return self.amenity_repo.get(amenity_id)
+        amenity = self.amenity_repo.get(amenity_id)
+        if not amenity:
+            raise ValueError("Amenity not found.")
+        return amenity
+
     
     def get_all_amenities(self):
         return self.amenity_repo.get_all()
@@ -46,6 +57,31 @@ class HBnBFacade:
 # 🏠 Places
     
     def create_place(self, place_data):
+        # Validar que el propietario existe
+        owner = self.user_repo.get_by_id(place_data['owner_id'])
+        if not owner:
+            raise ValueError("Owner not found.")
+
+        # Validar datos de lugar
+        if 'title' not in place_data or 'price' not in place_data or 'latitude' not in place_data or 'longitude' not in place_data:
+            raise ValueError("Title, price, latitude, and longitude are required.")
+
+        # Validar que el precio sea un número positivo y razonable
+        price = place_data['price']
+        if not isinstance(price, (int, float)) or price <= 0:
+            raise ValueError("Price must be a positive number.")
+
+        # Validar que la latitud esté en el rango de -90 a 90
+        latitude = place_data['latitude']
+        if not isinstance(latitude, (int, float)) or latitude < -90 or latitude > 90:
+            raise ValueError("Latitude must be between -90 and 90.")
+
+        # Validar que la longitud esté en el rango de -180 a 180
+        longitude = place_data['longitude']
+        if not isinstance(longitude, (int, float)) or longitude < -180 or longitude > 180:
+            raise ValueError("Longitude must be between -180 and 180.")
+
+        # Si pasa lass validaciones crear place
         place = Place(
             title=place_data['title'],
             description=place_data.get('description', ''),
@@ -54,30 +90,35 @@ class HBnBFacade:
             longitude=place_data['longitude'],
             owner=place_data['owner_id']
         )
-        self.place_repo.save(place)
+        self.place_repo.add(place)
         return place
 
     def get_place(self, place_id):
         place = self.place_repo.get_by_id(place_id)
-        if place:
-            owner = self.user_repo.get_by_id(place.owner)
-            amenities = self.amenity_repo.get_by_place_id(place_id)
-            return {
-                'id': place.id,
-                'title': place.title,
-                'description': place.description,
-                'price': place.price,
-                'latitude': place.latitude,
-                'longitude': place.longitude,
-                'owner': {
-                    'id': owner.id,
-                    'first_name': owner.first_name,
-                    'last_name': owner.last_name,
-                    'email': owner.email
-                },
-                'amenities': [{'id': amenity.id, 'name': amenity.name} for amenity in amenities]
-            }
-        return None
+        if not place:
+            raise ValueError("Place not found.")
+
+        owner = self.user_repo.get_by_id(place.owner)
+        if not owner:
+            raise ValueError("Owner not found.")
+
+        amenities = self.amenity_repo.get_by_place_id(place_id)
+
+        return {
+            'id': place.id,
+            'title': place.title,
+            'description': place.description,
+            'price': place.price,
+            'latitude': place.latitude,
+            'longitude': place.longitude,
+            'owner': {
+                'id': owner.id,
+                'first_name': owner.first_name,
+                'last_name': owner.last_name,
+                'email': owner.email
+                     },
+            'amenities': [{'id': amenity.id, 'name': amenity.name} for amenity in amenities]
+               }
 
     def get_all_places(self):
         places = self.place_repo.get_all()
@@ -120,7 +161,10 @@ class HBnBFacade:
         return review
 
     def get_review(self, review_id):
-        return self.review_repo.get(review_id)
+        review = self.review_repo.get(review_id)
+        if not review:
+            raise ValueError("Review not found.")
+        return review
 
     def get_all_reviews(self):
         return self.review_repo.get_all()
@@ -132,7 +176,7 @@ class HBnBFacade:
         review = self.get_review(review_id)
         if not review:
             raise ValueError("Review not found.")
-        
+
         if 'text' in review_data:
             review.text = review_data['text']
         if 'rating' in review_data:
