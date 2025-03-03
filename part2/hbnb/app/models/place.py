@@ -10,9 +10,9 @@ class Place(BaseModel):
         # Validaciones de entrada
         self.title = self._validate_title(title)
         self.description = self._validate_description(description)
-        self.price = price 
-        self.latitude = latitude
-        self.longitude = longitude
+        self.price = self._validate_price(price) 
+        self.latitude = self._validate_latitude(latitude)
+        self.longitude = self._validate_longitude(longitude)
         self.owner = self._validate_owner(owner)
 
         # Inicialización de reseñas y servicios
@@ -30,6 +30,21 @@ class Place(BaseModel):
             raise ValueError("Description cannot be empty")
         return description
 
+    def _validate_price(self, price):
+        if not isinstance(price, (int, float)) or price < 0:
+            raise ValueError("Price must be a non-negative float.")
+        return price
+
+    def _validate_latitude(self, latitude):
+        if not isinstance(latitude, (int, float)) or not (-90 <= latitude <= 90):
+            raise ValueError("Latitude must be between -90 and 90.")
+        return latitude
+
+    def _validate_longitude(self, longitude):
+        if not isinstance(longitude, (int, float)) or not (-180 <= longitude <= 180):
+            raise ValueError("Longitude must be between -180 and 180.")
+        return longitude
+
     def _validate_owner(self, owner):
         if not owner:
             raise ValueError("Owner cannot be empty")
@@ -38,7 +53,7 @@ class Place(BaseModel):
     # funciones para agregar reseñas y amenidades
     def add_review(self, review):
         self.reviews.append(review)
-    
+
     # funcion para agregar una amenidad
     def add_amenity(self, amenity):
         if not isinstance(amenity, Amenity):
@@ -57,7 +72,7 @@ class Place(BaseModel):
             raise ValueError("Price must be a non-negative float.")
         self._price = float(value)
 
-    # Propiedad para latitude
+
     @property
     def latitude(self):
         return self._latitude
@@ -68,7 +83,7 @@ class Place(BaseModel):
             raise ValueError("Latitude must be between -90 and 90.")
         self._latitude = float(value)
 
-    # Propiedad para longitude
+
     @property
     def longitude(self):
         return self._longitude
@@ -78,3 +93,13 @@ class Place(BaseModel):
         if not isinstance(value, (int, float)) or not (-180 <= value <= 180):
             raise ValueError("Longitude must be between -180 and 180.")
         self._longitude = float(value)
+
+    def to_dict(self):
+        return {
+            "title": self.title,
+            "description": self.description,
+            "price": self.price,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "owner": self.owner
+        }

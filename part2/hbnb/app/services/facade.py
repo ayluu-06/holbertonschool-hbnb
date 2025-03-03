@@ -4,6 +4,7 @@ from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
+from datetime import datetime
 
 class HBnBFacade:
     def __init__(self):
@@ -41,7 +42,10 @@ class HBnBFacade:
 # 🏨 Amenities
     
     def create_amenity(self, amenity_data):
-        amenity = Amenity(**amenity_data)
+        if "name" not in amenity_data or not amenity_data["name"]:
+            raise ValueError("Amenity name is required")
+
+        amenity = Amenity(name=amenity_data["name"])
         self.amenity_repo.add(amenity)
         return amenity
 
@@ -51,22 +55,40 @@ class HBnBFacade:
             raise ValueError("Amenity not found.")
         return amenity
 
-    
     def get_all_amenities(self):
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
         amenity = self.get_amenity(amenity_id)
-        if amenity:
-            for key, value in amenity_data.items():
-                setattr(amenity, key, value)
+
+        # Actualizar los campos que han cambiado
+        for key, value in amenity_data.items():
+            setattr(amenity, key, value)
+
+        # Actualizar la fecha de modificación
+        amenity.updated_at = datetime.utcnow()
         return amenity
+
+    def delete_amenity(self, amenity_id):
+        amenity = self.get_amenity(amenity_id)
+        self.amenity_repo.delete(amenity_id)
+        return {"message": "Amenity deleted successfully"}
+
+    def delete_all_amenities(self):
+        print("Borrando todos los amenities...")
+        self.amenity_repo.delete_all()  
+        print("Todos los amenities han sido eliminados.")
+
 
 # 🏠 Places
     
     def create_place(self, place_data):
+        # Verificar si 'owner_id' está presente
+        if 'owner' not in place_data:
+            raise ValueError("'owner_id' is required in place_data.")
+    
         # Validar que el propietario existe
-        owner = self.user_repo.get_by_id(place_data['owner_id'])
+        owner = self.user_repo.get_by_id(place_data['owner'])
         if not owner:
             raise ValueError("Owner not found.")
 
@@ -89,29 +111,55 @@ class HBnBFacade:
         if not isinstance(longitude, (int, float)) or longitude < -180 or longitude > 180:
             raise ValueError("Longitude must be between -180 and 180.")
 
-        # Si pasa lass validaciones crear place
+        # Validar que 'amenities' esté presente y sea una lista no vacía
+        if 'amenities' not in place_data or not isinstance(place_data['amenities'], list) or len(place_data['amenities']) == 0:
+            raise ValueError("At least one amenity is required for the place.")
+
+        # Validar que las comodidades especificadas existan
+        amenities = place_data['amenities']
+        for amenity_id in amenities:
+            amenity = self.amenity_repo.get(amenity_id)
+            if not amenity:
+                raise ValueError(f"Amenity with ID {amenity_id} not found.")
+
+        # Si pasa las validaciones, crear el lugar
         place = Place(
             title=place_data['title'],
             description=place_data.get('description', ''),
             price=place_data['price'],
             latitude=place_data['latitude'],
             longitude=place_data['longitude'],
-            owner=place_data['owner_id']
+            owner=place_data['owner']
         )
+
+    # Asignar las comodidades al lugar
+        for amenity_id in amenities:
+            amenity = self.amenity_repo.get(amenity_id)
+            place.add_amenity(amenity)  # Método para asociar amenidad al lugar
+
+        # Guardar el lugar
         self.place_repo.add(place)
         return place
 
     def get_place(self, place_id):
+        # Obtener el lugar usando el repositorio de lugares
         place = self.place_repo.get_by_id(place_id)
+    
+        # Verificar si el lugar existe
         if not place:
             raise ValueError("Place not found.")
-
+    
+        # Obtener el propietario asociado con el lugar
         owner = self.user_repo.get_by_id(place.owner)
+    
+        # Verificar si el propietario existe
         if not owner:
             raise ValueError("Owner not found.")
-
+    
+        # Obtener las comodidades asociadas con el lugar
         amenities = self.amenity_repo.get_by_place_id(place_id)
-
+    
+        # Construir y retornar el diccionario con la información del lugar, propietario y comodidades
         return {
             'id': place.id,
             'title': place.title,
@@ -124,32 +172,10 @@ class HBnBFacade:
                 'first_name': owner.first_name,
                 'last_name': owner.last_name,
                 'email': owner.email
-                     },
+                      },
             'amenities': [{'id': amenity.id, 'name': amenity.name} for amenity in amenities]
-               }
+                }
 
-    def get_all_places(self):
-        places = self.place_repo.get_all()
-        return [{
-            'id': place.id,
-            'title': place.title,
-            'latitude': place.latitude,
-            'longitude': place.longitude
-        } for place in places]
-
-    def update_place(self, place_id, place_data):
-        place = self.place_repo.get_by_id(place_id)
-        if not place:
-            raise ValueError("Place not found")
-
-        place.title = place_data.get('title', place.title)
-        place.description = place_data.get('description', place.description)
-        place.price = place_data.get('price', place.price)
-        place.latitude = place_data.get('latitude', place.latitude)
-        place.longitude = place_data.get('longitude', place.longitude)
-
-        self.place_repo.update(place)
-        return place
     
 # 📝 Review
 

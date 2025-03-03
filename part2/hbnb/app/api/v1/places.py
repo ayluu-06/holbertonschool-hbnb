@@ -37,7 +37,7 @@ class PlaceList(Resource):
         place_data = api.payload
         try:
             new_place = facade.create_place(place_data)
-            return new_place, 201
+            return new_place.to_dict(), 201  # Return the new place as a dictionary
         except ValueError as e:
             return {'error': str(e)}, 400
 
@@ -45,7 +45,7 @@ class PlaceList(Resource):
     def get(self):
         """Retrieve a list of all places"""
         places = facade.get_all_places()
-        return places, 200
+        return [place.to_dict() for place in places], 200  # Ensure each place is serialized to dict
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
@@ -55,7 +55,7 @@ class PlaceResource(Resource):
         """Get place details by ID"""
         place = facade.get_place(place_id)
         if place:
-            return place, 200
+            return place.to_dict(), 200  # Return the place as a dictionary
         return {'error': 'Place not found'}, 404
 
     @api.expect(place_model)
@@ -67,6 +67,6 @@ class PlaceResource(Resource):
         place_data = api.payload
         try:
             updated_place = facade.update_place(place_id, place_data)
-            return updated_place, 200
+            return updated_place.to_dict(), 200  # Return the updated place as a dictionary
         except ValueError as e:
             return {'error': str(e)}, 400

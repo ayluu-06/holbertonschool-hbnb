@@ -64,3 +64,13 @@ class AmenityResource(Resource):
             return amenity.to_dict()
         except ValueError as e:
             api.abort(400, str(e))
+    
+    @api.doc('delete_amenity')
+    @api.response(200, 'Amenity successfully deleted')
+    @api.response(404, 'Amenity not found')
+    def delete(self, amenity_id):
+        """Delete an amenity"""
+        result = facade.delete_amenity(amenity_id)
+        if 'error' in result:
+            api.abort(404, result['error'])
+        return {"message": "Amenity successfully deleted"}, 200
