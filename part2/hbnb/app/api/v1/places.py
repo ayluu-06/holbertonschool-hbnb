@@ -36,8 +36,10 @@ class PlaceList(Resource):
         """Register a new place"""
         place_data = api.payload
         try:
-            new_place = facade.create_place(place_data)
-            return new_place.to_dict(), 201  # Return the new place as a dictionary
+            # Crear el lugar a través de la fachada
+            new_place, status_code = facade.create_place(place_data)
+            # Asegúrate de devolver un diccionario y el código de estado
+            return new_place, status_code  # Devuelve el diccionario con el lugar y el código de estado
         except ValueError as e:
             return {'error': str(e)}, 400
 
