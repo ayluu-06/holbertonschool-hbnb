@@ -6,13 +6,15 @@ class Review(BaseModel):
     def __init__(self, text, rating, place, user):
         super().__init__()
 
-        # Validaciones de entrada
-        self.text = self._validate_text(text)  # Usa el setter para text
-        self.rating = self._validate_rating(rating)
+        # Validar que 'place' y 'user' sean instancias correctas
         self.place = self._validate_place(place)
         self.user = self._validate_user(user)
 
-    # Función que valida que text tenga más de 10 caracteres
+        # Validaciones de entrada
+        self.text = self._validate_text(text)
+        self.rating = self._validate_rating(rating)
+
+    # Validación de texto
     def _validate_text(self, text):
         if not text:
             raise ValueError("Text cannot be empty")
@@ -20,58 +22,38 @@ class Review(BaseModel):
             raise ValueError("Text must be at least 10 characters long")
         return text
 
-    # Función que valida que rating esté entre 1 y 5
+    # Validación de rating
     def _validate_rating(self, rating):
         if not isinstance(rating, (int, float)):
             raise ValueError("Rating must be a number")
         if not (1 <= rating <= 5):
             raise ValueError("Rating must be between 1 and 5")
         return rating
-    
-    # Función que valida que place sea una instancia de Place
+
+    # Validación de place
     def _validate_place(self, place):
         if not isinstance(place, Place):
             raise ValueError("Place must be an instance of the Place class")
         return place
 
-    # Función que valida que user sea una instancia de User
+    # Validación de user
     def _validate_user(self, user):
         if not isinstance(user, User):
             raise ValueError("User must be an instance of the User class")
         return user
 
-    # Propiedad para text
-    @property
-    def text(self):
-        return self._text
+    # Método para convertir el objeto a un diccionario
+    def to_dict(self):
+        
+        print(f"created_at: {self.created_at} ({type(self.created_at)})")
+        print(f"updated_at: {self.updated_at} ({type(self.updated_at)})")
 
-    @text.setter
-    def text(self, value):
-        self._text = self._validate_text(value)
-
-    # Propiedad para rating
-    @property
-    def rating(self):
-        return self._rating
-
-    @rating.setter
-    def rating(self, value):
-        self._rating = self._validate_rating(value)
-
-    # Propiedad para place
-    @property
-    def place(self):
-        return self._place
-
-    @place.setter
-    def place(self, value):
-        self._place = self._validate_place(value)
-
-    # Propiedad para user
-    @property
-    def user(self):
-        return self._user
-
-    @user.setter
-    def user(self, value):
-        self._user = self._validate_user(value)
+        return {
+            "id": str(self.id),
+            "text": self.text,
+            "rating": self.rating,
+            "place_id": str(self.place.id),
+            "user_id": str(self.user.id),
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }

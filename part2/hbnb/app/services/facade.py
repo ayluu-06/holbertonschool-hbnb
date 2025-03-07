@@ -5,7 +5,6 @@ from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
 from datetime import datetime
-from flask import jsonify
 
 class HBnBFacade:
     def __init__(self):
@@ -194,19 +193,36 @@ class HBnBFacade:
 # 📝 Review
 
     def create_review(self, review_data):
-        user = self.user_repo.get_by_id(review_data['user_id'])
-        place = self.place_repo.get_by_id(review_data['place_id'])
-        if not user or not place:
-            raise ValueError("Invalid user_id or place_id.")
+        try:
+            # Verificar que los datos de review sean correctos
+            if 'text' not in review_data or not review_data['text']:
+                raise ValueError("Review text is required.")
+            if 'rating' not in review_data or not isinstance(review_data['rating'], (int, float)):
+                raise ValueError("Valid rating is required.")
 
-        review = Review(
-            text=review_data['text'],
-            rating=review_data['rating'],
-            user_id=review_data['user_id'],
-            place_id=review_data['place_id']
-        )
-        self.review_repo.add(review)
-        return review
+            user = self.user_repo.get(review_data['user_id'])
+            place = self.place_repo.get(review_data['place_id'])
+
+            # Validar si los objetos existen
+            if not user or not place:
+                raise ValueError("Invalid user_id or place_id.")
+
+            # Crear la review
+            review = Review(
+                text=review_data['text'],
+                rating=review_data['rating'],
+                user=user,  # Pasando el objeto completo User
+                place=place # aqui igual
+            )
+
+            self.review_repo.add(review)
+            return review.to_dict()
+    
+        except Exception as e:
+            print(f"Error al crear la review: {e}")
+            return {"error": str(e)}
+
+
 
     def get_review(self, review_id):
         review = self.review_repo.get(review_id)
@@ -215,7 +231,9 @@ class HBnBFacade:
         return review
 
     def get_all_reviews(self):
-        return self.review_repo.get_all()
+        reviews = self.review_repo.get_all()
+        return [review.to_dict() for review in reviews]
+     
 
     def get_reviews_by_place(self, place_id):
         return self.review_repo.get_by_attribute('place_id', place_id)

@@ -6,7 +6,7 @@ BASE_URL_AMENITIES="http://localhost:5000/api/v1/amenities"
 
 # Crear un nuevo usuario (owner) si no existe
 echo "Creando un nuevo usuario..."
-create_user_response=$(curl -s -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"email": "pepssess@example.com", "first_name": "Juan", "last_name": "Pérez"}' $BASE_URL_USERS/)
+create_user_response=$(curl -s -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"email": "ejemplo12@example.com", "first_name": "Juan", "last_name": "Pérez"}' $BASE_URL_USERS/)
 http_code=$(echo "$create_user_response" | tail -n 1)  # Obtener el código de estado HTTP
 create_user_response_body=$(echo "$create_user_response" | head -n -1)  # Obtener el cuerpo de la respuesta
 
@@ -23,8 +23,8 @@ fi
 
 # Crear amenities si no existen
 echo "Creando amenities..."
-create_amenity1_response=$(curl -s -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"name": "amenity1"}' $BASE_URL_AMENITIES/)
-create_amenity2_response=$(curl -s -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"name": "amenity2"}' $BASE_URL_AMENITIES/)
+create_amenity1_response=$(curl -s -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"name": "wifi"}' $BASE_URL_AMENITIES/)
+create_amenity2_response=$(curl -s -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"name": "estacionamiento"}' $BASE_URL_AMENITIES/)
 
 # Obtener los códigos de estado y las respuestas
 http_code_amenity1=$(echo "$create_amenity1_response" | tail -n 1)
@@ -49,11 +49,11 @@ echo "owner_id a enviar: $owner_id"  # Línea de depuración
 # Crear un lugar con datos válidos y mostrar la solicitud completa
 echo "Creando un nuevo lugar con datos válidos..."
 create_place_request='{
-    "title": "Plaza Principal", 
-    "description": "Este es un lugar icónico en el centro de Montevideo.", 
-    "price": 100.0, 
-    "latitude": -34.9011, 
-    "longitude": -56.1645, 
+    "title": "La costa ", 
+    "description": "Lugar tranquilo ", 
+    "price": 1000, 
+    "latitude": 80, 
+    "longitude": -56, 
     "owner_id": "'"$owner_id"'", 
     "amenities": [
         "'"$amenity1_id"'",

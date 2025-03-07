@@ -13,7 +13,7 @@ def client():
 
 def test_create_user_valid():
     # Crear un usuario con datos válidos
-    user = User("John", "Doe", "john.doe@example.com")
+    user = User("John", "Doe", "pepito.doe@example.com")
     assert user.first_name == "John"
     assert user.last_name == "Doe"
     assert user.email == "john.doe@example.com"

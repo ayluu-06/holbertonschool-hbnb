@@ -4,7 +4,7 @@ BASE_URL="http://localhost:5000/api/v1/amenities"
 
 # Crear un amenity
 echo "Creando un nuevo amenity..."
-create_response=$(curl -s -X POST -H "Content-Type: application/json" -d '{"name": "Picina"}' $BASE_URL/)
+create_response=$(curl -s -X POST -H "Content-Type: application/json" -d '{"name": "gym"}' $BASE_URL/)
 if echo "$create_response" | jq -e '.id' &>/dev/null; then
     amenity_id=$(echo "$create_response" | jq -r '.id')
     echo "Amenity creado exitosamente: $create_response"

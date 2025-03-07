@@ -70,3 +70,5 @@ class InMemoryRepository(Repository):
         return next((obj for obj in self._storage.values() if getattr(obj, attr_name, None) == attr_value), None)
 
 
+    def get_by_id(self, obj_id):
+        return self.get(obj_id)

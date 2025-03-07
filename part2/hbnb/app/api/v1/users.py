@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
-api = Namespace('users', description='Operaciones con usuarios')
+api = Namespace('users', description='User operations')
 
 # Definir el modelo de usuario para validación y documentación
 user_model = api.model('User', {

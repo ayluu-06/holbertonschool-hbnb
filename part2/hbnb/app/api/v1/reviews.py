@@ -1,9 +1,9 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from app.models import review
 
 api = Namespace('reviews', description='Review operations')
 
-# Define the review model for input validation and documentation
 review_model = api.model('Review', {
     'text': fields.String(required=True, description='Text of the review'),
     'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
@@ -29,7 +29,7 @@ class ReviewList(Resource):
     def get(self):
         """Retrieve a list of all reviews"""
         reviews = facade.get_all_reviews()
-        return reviews, 200
+        return [review.to_dict() for review in reviews], 200
 
 @api.route('/<review_id>')
 class ReviewResource(Resource):
@@ -39,7 +39,7 @@ class ReviewResource(Resource):
         """Get review details by ID"""
         review = facade.get_review(review_id)
         if review:
-            return review, 200
+            return review.to_dict(), 200
         return {'error': 'Review not found'}, 404
 
     @api.expect(review_model)
@@ -51,7 +51,7 @@ class ReviewResource(Resource):
         review_data = api.payload
         try:
             updated_review = facade.update_review(review_id, review_data)
-            return updated_review, 200
+            return updated_review.to_dict(), 200
         except ValueError as e:
             return {'error': str(e)}, 400
 
@@ -73,5 +73,5 @@ class PlaceReviewList(Resource):
         """Get all reviews for a specific place"""
         reviews = facade.get_reviews_by_place(place_id)
         if reviews:
-            return reviews, 200
+            return [review.to_dict() for review in reviews], 200
         return {'error': 'Place not found'}, 404
