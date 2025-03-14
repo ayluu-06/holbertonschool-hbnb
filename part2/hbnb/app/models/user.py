@@ -1,5 +1,16 @@
+
+
+
+
+
+
+
+
+
+
+
 #!/usr/bin/python3
-from flask_bcrypt import Bcrypt
+import bcrypt
 from app.models.base_model import BaseModel
 import re
 
@@ -36,8 +47,12 @@ class User(BaseModel):
         
         #Funcion que cifra la contraseña antes de almacenarla.
     def hash_password(self, password):
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+        if not password:
+            raise ValueError("Password cannot be empty")
+        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
         #Verifica si la contraseña coincide con la almacenada.
     def verify_password(self, password):
-        return bcrypt.check_password_hash(self.password, password)
+        if not self.password_hash:
+            raise ValueError("No password set for this user")
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))

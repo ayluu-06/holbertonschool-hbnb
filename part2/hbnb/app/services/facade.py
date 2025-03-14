@@ -14,6 +14,11 @@ class HBnBFacade:
         self.review_repo = InMemoryRepository()
 
 # 👨 users
+class UserService:
+    
+    def __init__(self, user_repo):
+        self.user_repo = user_repo  # Aquí inyectamos el repositorio de usuarios
+
     def create_user(self, user_data):
         # Validar que first_name y last_name no estén vacíos
         if not user_data.get("first_name") or not user_data.get("last_name"):
@@ -24,20 +29,43 @@ class HBnBFacade:
         if not re.match(email_regex, user_data.get("email", "")):
             raise ValueError("Invalid email format.")
         
+        # Verificar si el correo ya está registrado
         existing_user = self.get_user_by_email(user_data.get("email"))
         if existing_user:
             raise ValueError("Email already registered")
 
         # Crear usuario solo si las validaciones pasan
-        user = User(**user_data)
-        self.user_repo.add(user)
-        return user
-    
+        new_user = User(
+            first_name=user_data.get("first_name"),
+            last_name=user_data.get("last_name"),
+            email=user_data.get("email"),
+            is_admin=user_data.get("is_admin", False)
+        )
+        
+        # Hashear la contraseña antes de almacenarla
+        password = user_data.get("password")
+        if not password:
+            raise ValueError("Password is required")
+        
+        new_user.hash_password(password)
+
+        # Almacenar el nuevo usuario en la base de datos
+        self.save(new_user)
+
+        # Retornar el nuevo usuario creado
+        return new_user
+
     def get_user_by_email(self, email):
+        # Buscar un usuario por su correo electrónico
         return self.user_repo.get_by_attribute('email', email)
-    
+
     def get_all_users(self):
+        # Obtener todos los usuarios
         return self.user_repo.get_all()
+
+    def save(self, user):
+        # Método para guardar el usuario en la base de datos (por ejemplo, usando un repositorio)
+        self.user_repo.save(user)
     
 # 🏨 Amenities
     
