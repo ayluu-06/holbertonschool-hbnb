@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+from flask_bcrypt import Bcrypt
 from app.models.base_model import BaseModel
 import re
 
@@ -33,3 +33,11 @@ class User(BaseModel):
     def _is_valid_email(self, email):
         email_regex = r"(^[a-z0-9]+[.-_]*[a-z0-9]+@[a-z0-9-]+\.[a-z0-9-.]+$)"
         return re.match(email_regex, email) is not None
+        
+        #Funcion que cifra la contraseña antes de almacenarla.
+    def hash_password(self, password):
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+        #Verifica si la contraseña coincide con la almacenada.
+    def verify_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)

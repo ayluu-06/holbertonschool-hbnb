@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_bcrypt import Bcrypt
 from flask_restx import Api
 from flask_cors import CORS
 from app.api.v1.users import api as users_ns
@@ -15,6 +16,8 @@ def create_app(config_class=None):
     else:
         from config import DevelopmentConfig
         app.config.from_object(DevelopmentConfig)
+    
+    bcrypt = Bcrypt()
 
     # Inicializa Flask-REST y CORS
     api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API')
