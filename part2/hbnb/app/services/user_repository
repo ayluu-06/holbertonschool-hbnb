@@ -1,0 +1,35 @@
+from app.models.user import User
+from app.database.db import db_session
+
+class UserRepository:
+    def save(self, user):
+        """
+        Guarda un nuevo usuario en la base de datos.
+        """
+        db_session.add(user)
+        db_session.commit()
+
+    def get_by_email(self, email):
+        """
+        Busca un usuario por su email.
+        """
+        return db_session.query(User).filter_by(email=email).first()
+
+    def get_all(self):
+        """
+        Retorna todos los usuarios.
+        """
+        return db_session.query(User).all()
+
+    def get_by_id(self, user_id):
+        """
+        Busca un usuario por su ID.
+        """
+        return db_session.query(User).filter_by(id=user_id).first()
+
+    def delete(self, user):
+        """
+        Elimina un usuario.
+        """
+        db_session.delete(user)
+        db_session.commit()

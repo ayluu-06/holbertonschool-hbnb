@@ -64,7 +64,7 @@ class UserService:
         return self.user_repo.get_all()
 
     def save(self, user):
-        # Método para guardar el usuario en la base de datos (por ejemplo, usando un repositorio)
+        # Método para guardar el usuario en la base de datos (falta crear el metodo save para guardar a la base de datos)
         self.user_repo.save(user)
     
 # 🏨 Amenities
