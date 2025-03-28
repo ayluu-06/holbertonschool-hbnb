@@ -1,13 +1,40 @@
+import re
+from app.persistence.repository import UserRepository
+from app.persistence.repository import SQLAlchemyRepository
 from app.persistence.repository import InMemoryRepository
+from app.models.user import User
+from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
-        self.amenity_repo = InMemoryRepository()
+        self.user_repo = UserRepository()
+        self.amenity_repo = SQLAlchemyRepository(Amenity)
+        self.place_repo = SQLAlchemyRepository(Place)
+        self.review_repo = SQLAlchemyRepository(Review)
+
+    def create_user(self, user_data):
+        user = User(
+            first_name=user_data['first_name'],
+            last_name=user_data['last_name'],
+            email=user_data['email'],
+            password=user_data['password'],
+            is_admin=user_data.get('is_admin', False)
+        )
+        self.user_repo.create_user(user.first_name, user.last_name, user.email, user_data['password'], user.is_admin)
+        return user
+
+        #(**user_data)
+        #user.hash_password(user_data['password'])
+        #self.user_repo.add(user)
+        #return user
+
+    def get_user(self, user_id):
+        return self.user_repo.get(user_id)
+
+    def get_user_by_email(self, email):
+        return self.user_repo.get_user_by_email(email)
 
     # 🏠 Places
     

@@ -1,16 +1,31 @@
-#!/usr/bin/python3
-
-BaseModel = __import__('base_model.py').BaseModel
+import uuid
+from app import db
+from app.models.base_model import BaseModel
+from app.models.amenity import Amenity
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner):
+    __tablename__ = 'places'
+
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String(36), nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    reviews = db.relationship('Review', backref='place', lazy=True)
+    amenities = db.relationship('Amenity', backref='place', lazy=True)
+
+    def __init__(self, title, description, price, latitude, longitude, owner_id):
         super().__init__()
         self.title = title
         self.description = description
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
-        self.owner = owner
+        self.owner_id = owner_id
         self.reviews = []
         self.amenities = []
 
