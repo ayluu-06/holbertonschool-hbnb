@@ -1,4 +1,6 @@
 import re
+from app.persistence.repository import UserRepository
+from app.persistence.repository import SQLAlchemyRepository
 from app.persistence.repository import InMemoryRepository
 from app.models.user import User
 from app.models.amenity import Amenity
@@ -8,11 +10,10 @@ from datetime import datetime
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = InMemoryRepository()
-        self.amenity_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
-
+       self.user_repo = UserRepository()
+       self.amenity_repo = SQLAlchemyRepository(Amenity)
+       self.place_repo = SQLAlchemyRepository(Place)
+       self.review_repo = SQLAlchemyRepository(Review)
 # 👨 users
 class UserService:
     
@@ -189,34 +190,59 @@ class UserService:
         """Recupera un lugar por su ID desde el repositorio."""
 
         # Buscar el lugar directamente usando el ID
-        place = self.place_repo.get(place_id)
+        place = self.place_repo.get_by_id(place_id)
         if place:
-            return place
+            owner = self.user_repo.get_by_id(place.owner)
+            amenities = self.amenity_repo.get_by_place_id(place_id)
+            return {
+                'id': place.id,
+                'title': place.title,
+                'description': place.description,
+                'price': place.price,
+                'latitude': place.latitude,
+                'longitude': place.longitude,
+                'owner': {
+                    'id': owner.id,
+                    'first_name': owner.first_name,
+                    'last_name': owner.last_name,
+                    'email': owner.email
+                },
+                'amenities': [{'id': amenity.id, 'name': amenity.name} for amenity in amenities]
+            }
         return None
+
     
     def get_all_places(self):
-        """Recupera todos los lugares desde el repositorio."""
         places = self.place_repo.get_all()
-        if places:
-            return places
-        return [] 
+        return [{
+            'id': place.id,
+            'title': place.title,
+            'latitude': place.latitude,
+            'longitude': place.longitude
+        } for place in places]
     
-    def update_place(self, place_id, updated_data):
-        """Actualiza los detalles de un lugar existente."""
-        # Buscar el lugar en el repositorio por su ID
-        place = self.place_repo.get(place_id)
-    
+    def get_all_places(self):
+        places = self.place_repo.get_all()
+        return [{
+            'id': place.id,
+            'title': place.title,
+            'latitude': place.latitude,
+            'longitude': place.longitude
+        } for place in places]
+
+    def update_place(self, place_id, place_data):
+        place = self.place_repo.get_by_id(place_id)
         if not place:
-            raise ValueError("Place not found")  # Si el lugar no se encuentra, lanza un error
-    
-        # Actualizar los campos del lugar con los nuevos datos
-        for key, value in updated_data.items():
-            if hasattr(place, key):
-                setattr(place, key, value)
-    
-    
-        self.update_at = datetime.utcnow()
-        return place 
+            raise ValueError("Place not found")
+
+        place.title = place_data.get('title', place.title)
+        place.description = place_data.get('description', place.description)
+        place.price = place_data.get('price', place.price)
+        place.latitude = place_data.get('latitude', place.latitude)
+        place.longitude = place_data.get('longitude', place.longitude)
+
+        self.place_repo.update(place)
+        return place
     
 # 📝 Review
 
@@ -270,7 +296,6 @@ class UserService:
         review = self.get_review(review_id)
         if not review:
             raise ValueError("Review not found.")
-
         if 'text' in review_data:
             review.text = review_data['text']
         if 'rating' in review_data:
