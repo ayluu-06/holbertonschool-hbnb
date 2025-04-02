@@ -121,7 +121,7 @@ class UserService:
         if 'owner_id' not in place_data:
             raise ValueError("'owner_id' is required in place_data.")
 
-    # Validar que el propietario existe
+        # Validar que el propietario existe
         owner = self.user_repo.get(place_data['owner_id'])
         if not owner:
             raise ValueError("Owner not found.")
@@ -149,16 +149,12 @@ class UserService:
             raise ValueError("At least one amenity is required for the place.")
 
         # Validar que las amenities existan
-        amenities = []
-        for amenity_id in place_data['amenities']:
-            amenity = self.amenity_repo.get(amenity_id)
-            if not self.amenity_repo.get(amenity_id):
-                raise ValueError(f"Amenity with ID {amenity_id} not found.")
-            
-            if amenity:
-                amenities.append(amenity)
-            else:
-                raise ValueError(f"Amenity with ID {amenity_id} not found.")
+        amenities = [self.amenity_repo.get(amenity_id) for amenity_id in place_data['amenities'] if self.amenity_repo.get(amenity_id)]
+
+        # Si algún ID no se encontró, lanzar un error
+        missing_ids = [amenity_id for amenity_id in place_data['amenities'] if not self.amenity_repo.get(amenity_id)]
+        if missing_ids:
+            raise ValueError(f"Amenities not found for IDs: {missing_ids}")
 
         # Crear el lugar
         place = Place(
@@ -173,8 +169,6 @@ class UserService:
         # **Importante**: Asegurar que place.amenities es una lista antes de agregar elementos
         place.amenities.extend(amenities)  
 
-        # validacion previa antes de asignar el amenity para evitar errores
-        amenities = [self.amenity_repo.get(amenity_id) for amenity_id in place_data['amenities'] if self.amenity_repo.get(amenity_id)]
 
         # Asignar amenities correctamente
         for amenity in amenities:
@@ -292,7 +286,7 @@ class UserService:
 
     def get_reviews_by_place(self, place_id):
         try:
-            reviews = self.model.query.filter_by(place_id=place_id).all()
+            reviews = self.review_repo.get_reviews_by_place(place_id)
             return [review.to_dict() for review in reviews] if reviews else []
         except Exception as e:
             print(f"Error fetching reviews: {e}")
@@ -316,4 +310,5 @@ class UserService:
         if not review:
             raise ValueError("Review not found.")
         self.review_repo.delete(review_id)
+        self.db.session.commit()
         return {"message": "Review deleted successfully"}

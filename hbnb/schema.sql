@@ -1,5 +1,5 @@
--- User Table
-CREATE TABLE IF NOT EXISTS User (
+-- Users Table
+CREATE TABLE IF NOT EXISTS Users (
     id CHAR(36) PRIMARY KEY,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
