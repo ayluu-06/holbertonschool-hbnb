@@ -67,7 +67,7 @@ class UserService:
 
     def save(self, user):
         # Método para guardar el usuario en la base de datos (falta crear el metodo save para guardar a la base de datos)
-        self.user_repo.save(user)
+        self.user_repo.add(user)
     
 # 🏨 Amenities
     
@@ -102,6 +102,8 @@ class UserService:
     def delete_amenity(self, amenity_id):
         amenity = self.get_amenity(amenity_id)
         self.amenity_repo.delete(amenity_id)
+        self.db.session.query(Amenity).delete()
+        self.db.session.commit()
         return {"message": "Amenity deleted successfully"}
 
     def delete_all_amenities(self):
@@ -150,6 +152,9 @@ class UserService:
         amenities = []
         for amenity_id in place_data['amenities']:
             amenity = self.amenity_repo.get(amenity_id)
+            if not self.amenity_repo.get(amenity_id):
+                raise ValueError(f"Amenity with ID {amenity_id} not found.")
+            
             if amenity:
                 amenities.append(amenity)
             else:
@@ -166,7 +171,10 @@ class UserService:
                       )
 
         # **Importante**: Asegurar que place.amenities es una lista antes de agregar elementos
-        place.amenities = []  
+        place.amenities.extend(amenities)  
+
+        # validacion previa antes de asignar el amenity para evitar errores
+        amenities = [self.amenity_repo.get(amenity_id) for amenity_id in place_data['amenities'] if self.amenity_repo.get(amenity_id)]
 
         # Asignar amenities correctamente
         for amenity in amenities:
@@ -223,7 +231,7 @@ class UserService:
         } for place in places]
 
     def update_place(self, place_id, place_data):
-        place = self.place_repo.get_by_id(place_id)
+        place = self.place_repo.get(place_id)
         if not place:
             raise ValueError("Place not found")
 
@@ -283,7 +291,12 @@ class UserService:
      
 
     def get_reviews_by_place(self, place_id):
-        return self.review_repo.model.query.filter_by(place_id=place_id).all()
+        try:
+            reviews = self.model.query.filter_by(place_id=place_id).all()
+            return [review.to_dict() for review in reviews] if reviews else []
+        except Exception as e:
+            print(f"Error fetching reviews: {e}")
+            return []
 
     def update_review(self, review_id, review_data):
         review = self.get_review(review_id)
@@ -295,6 +308,7 @@ class UserService:
             review.rating = review_data['rating']
 
         self.review_repo.update(review)
+        self.db.session.commit()
         return review
 
     def delete_review(self, review_id):
