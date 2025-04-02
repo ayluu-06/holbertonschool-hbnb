@@ -191,9 +191,9 @@ class UserService:
         """Recupera un lugar por su ID desde el repositorio."""
 
         # Buscar el lugar directamente usando el ID
-        place = self.place_repo.get_by_id(place_id)
+        place = self.place_repo.get(place_id)
         if place:
-            owner = self.user_repo.get_by_id(place.owner)
+            owner = self.user_repo.get(place.owner_id)
             amenities = self.amenity_repo.get_by_place_id(place_id)
             return {
                 'id': place.id,
@@ -221,15 +221,6 @@ class UserService:
             'latitude': place.latitude,
             'longitude': place.longitude
         } for place in places]
-    
-    def get_all_places(self):
-        places = self.place_repo.get_all()
-        return [{
-            'id': place.id,
-            'title': place.title,
-            'latitude': place.latitude,
-            'longitude': place.longitude
-        } for place in places]
 
     def update_place(self, place_id, place_data):
         place = self.place_repo.get_by_id(place_id)
@@ -243,6 +234,7 @@ class UserService:
         place.longitude = place_data.get('longitude', place.longitude)
 
         self.place_repo.update(place)
+        self.db.session.commit()
         return place
     
 # 📝 Review
@@ -291,7 +283,7 @@ class UserService:
      
 
     def get_reviews_by_place(self, place_id):
-        return self.review_repo.get_by_attribute('place_id', place_id)
+        return self.review_repo.model.query.filter_by(place_id=place_id).all()
 
     def update_review(self, review_id, review_data):
         review = self.get_review(review_id)
@@ -310,3 +302,4 @@ class UserService:
         if not review:
             raise ValueError("Review not found.")
         self.review_repo.delete(review_id)
+        return {"message": "Review deleted successfully"}

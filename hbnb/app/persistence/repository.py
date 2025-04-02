@@ -85,8 +85,12 @@ class SQLAlchemyRepository(Repository):
         self.db = db_instance  # Usamos la instancia de db pasada
 
     def add(self, obj):
-        self.db.session.add(obj)
-        self.db.session.commit()
+        try: 
+            self.db.session.add(obj)
+            self.db.session.commit()
+        except Exception as e:
+            self.db.session.rollback()  # Evita cambios no confirmados
+            print(f"Error adding object: {e}")
 
     def get(self, obj_id):
         return self.model.query.get(obj_id)
@@ -142,10 +146,13 @@ class UserRepository(SQLAlchemyRepository):
         return user
 
     def delete_user(self, user_id):
-        user = self.get(user_id)
+        user = self.get_user_by_id(user_id)
         if user:
-            self.delete(user_id)
-        return user
+            self.db.session.delete(user)
+            self.db.session.commit()
+            return True
+        return False  # Indica que el usuario no existía
+
 
 
 # Repositorio específico para el modelo de lugar
