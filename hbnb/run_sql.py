@@ -14,5 +14,5 @@ def run_sql_script(db_path, script_path):
 
 if __name__ == '__main__':
     db_file = 'development.db'
-    run_sql_script(db_file, 'schema.sql')
+    run_sql_script(db_file, 'generate_tables.sql')
     run_sql_script(db_file, 'init_data.sql')
