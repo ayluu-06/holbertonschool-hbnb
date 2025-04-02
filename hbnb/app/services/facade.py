@@ -52,7 +52,7 @@ class UserService:
         new_user.hash_password(password)
 
         # Almacenar el nuevo usuario en la base de datos
-        self.save(new_user)
+        self.user_repo.add(new_user)
 
         # Retornar el nuevo usuario creado
         return new_user
@@ -260,8 +260,8 @@ class UserService:
             review = Review(
                 text=review_data['text'],
                 rating=review_data['rating'],
-                user=user,  # Pasando el objeto completo User
-                place=place # aqui igual
+                user_id=user.id,
+                place_id=place.id
             )
 
             self.review_repo.add(review)

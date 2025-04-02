@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import create_access_token, jwt_required
 
 api = Namespace('users', description='User operations / Operaciones con usuarios')
 
@@ -13,6 +14,7 @@ user_model = api.model('User', {
 
 @api.route('/')
 class UserList(Resource):
+    @jwt_required()
     @api.expect(user_model, validate=True)
     @api.response(201, 'User successfully created / Usuario creado exitosamente')
     @api.response(400, 'Email already registered / Correo ya registrado')
@@ -21,22 +23,25 @@ class UserList(Resource):
         """Register a new user / Registrar un nuevo usuario"""
         user_data = api.payload
 
-        # Simulate email uniqueness verification (should be replaced with real validation)
-        # Simulación de verificación de email único (debe ser reemplazado por validación real)
+        if not user_data.get('email') or not user_data.get('email').strip():
+            return {'error': 'El correo electrónico es obligatorio'}, 400
+        if not user_data.get('first_name') or not user_data.get('first_name').strip():
+            return {'error': 'El nombre es obligatorio'}, 400
+        if not user_data.get('last_name') or not user_data.get('last_name').strip():
+            return {'error': 'El apellido es obligatorio'}, 400
+        
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             return {'error': 'Email already registered / Correo ya registrado'}, 400
 
         new_user = facade.create_user(user_data)
-        return {
-            'id': new_user.id,
-            'first_name': new_user.first_name,
-            'last_name': new_user.last_name,
-            'email': new_user.email
-        }, 201
+        access_token = create_access_token(identity={'id': new_user.id, 'is_admin': new_user.is_admin})
+        return {'access_token': access_token, 'user': new_user.to_dict()}, 201
+
 
 @api.route('/<user_id>')
 class UserResource(Resource):
+    @jwt_required()
     @api.response(200, 'User details retrieved successfully / Detalles del usuario obtenidos correctamente')
     @api.response(404, 'User not found / Usuario no encontrado')
     def get(self, user_id):

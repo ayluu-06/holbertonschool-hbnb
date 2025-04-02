@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required
 
 api = Namespace('amenities', description='Amenity operations')
 
@@ -15,6 +16,7 @@ amenity_response_model = api.inherit('AmenityResponse', amenity_model, {
 
 @api.route('/')
 class AmenityList(Resource):
+    @jwt_required()
     @api.doc('list_amenities')
     @api.marshal_list_with(amenity_response_model)
     def get(self):
@@ -38,6 +40,7 @@ class AmenityList(Resource):
 @api.route('/<string:amenity_id>')
 @api.param('amenity_id', 'The amenity identifier')
 class AmenityResource(Resource):
+    @jwt_required()
     @api.doc('get_amenity')
     @api.response(200, 'Success', amenity_response_model)
     @api.response(404, 'Amenity not found')
@@ -57,6 +60,8 @@ class AmenityResource(Resource):
         """Update amenity details"""
         amenity_data = api.payload
         
+        if not amenity_data.get('name'):
+            api.abort(400, 'Name of the amenity is required')
         try:
             amenity = facade.update_amenity(amenity_id, amenity_data)
             if not amenity:

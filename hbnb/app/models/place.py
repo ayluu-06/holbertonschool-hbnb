@@ -2,16 +2,17 @@ import uuid
 from app import db
 from app.models.base_model import BaseModel
 from app.models.amenity import Amenity
+from app.models.review import Review
 
 # Definición de la tabla de relación entre Place y Amenity
 # Relationship table between Place and Amenity
 place_amenity = db.Table(
     'place_amenity',
     db.metadata,
-    db.Column('place_id', db.Integer, db.ForeignKey('places.id'), primary_key=True),
-    db.Column('amenity_id', db.Integer, db.ForeignKey('amenities.id'), primary_key=True),
-    extend_existing=True
+    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
+    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
 )
+
 
 class Place(BaseModel):
     __tablename__ = 'places'
@@ -24,9 +25,8 @@ class Place(BaseModel):
     price = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
-    owner_id = db.Column(db.String(36), nullable=False)
+    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Relaciones con otras tablas
     # Relationships with other tables
@@ -72,6 +72,8 @@ class Place(BaseModel):
     # Funciones para agregar reseñas y amenidades
     # Functions to add reviews and amenities
     def add_review(self, review):
+        if not isinstance(review, Review):
+            raise ValueError("Only Review instances can be added")
         self.reviews.append(review)
 
     def add_amenity(self, amenity):

@@ -1,5 +1,7 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services import facade
+
 
 api = Namespace('users', description='Operaciones con usuarios')
 
@@ -12,40 +14,52 @@ user_model = api.model('User', {
 
 @api.route('/')
 class UserList(Resource):
-    @api.expect(user_model, validate=True)
-    @api.response(201, 'Usuario creado exitosamente')
-    @api.response(400, 'Correo ya registrado')
-    @api.response(400, 'Datos de entrada inválidos')
+    @jwt_required()
     def post(self):
-        """Registrar un nuevo usuario"""
-        user_data = api.payload
+        """Registrar un nuevo usuario (solo administradores)"""
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
+            return {'error': 'Admin privileges required'}, 403
 
-        # Simulación de verificación de email único (debe ser reemplazado por validación real)
+        user_data = api.payload
+       
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             return {'error': 'Correo ya registrado'}, 400
 
         new_user = facade.create_user(user_data)
-        return {
-            'id': new_user.id,
-            'first_name': new_user.first_name,
-            'last_name': new_user.last_name,
-            'email': new_user.email
-        }, 201
+        
+        if not user_data.get('email'):
+            return {'error': 'El correo electrónico es obligatorio'}, 400
+
+        if not user_data.get('first_name'):
+            return {'error': 'El nombre es obligatorio'}, 400
+
+        if not user_data.get('last_name'):
+            return {'error': 'El apellido es obligatorio'}, 400
+        
+        return new_user.to_dict(), 201
+    
 
 @api.route('/<user_id>')
 class UserResource(Resource):
-    @api.response(200, 'Detalles del usuario obtenidos correctamente')
-    @api.response(404, 'Usuario no encontrado')
-    def get(self, user_id):
-        """Obtener detalles del usuario por ID"""
-        user = facade.get_user(user_id)
-        if not user:
-            return {'error': 'Usuario no encontrado'}, 404
+    @jwt_required()
+    def put(self, user_id):
+        """Modificar usuario (solo administradores o el mismo usuario)"""
+        current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
+        user_id_from_token = current_user.get('id')
 
-        return {
-            'id': user.id,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email
-        }, 200
+        if not is_admin and user_id != user_id_from_token:
+            return {'error': 'Unauthorized action'}, 403
+
+        user_data = api.payload
+        email = user_data.get('email')
+
+        if email:
+            existing_user = facade.get_user_by_email(email)
+            if existing_user and existing_user.id != user_id:
+                return {'error': 'Correo ya en uso'}, 400
+
+        updated_user = facade.update_user(user_id, user_data)
+        return updated_user.to_dict(), 200

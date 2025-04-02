@@ -2,12 +2,12 @@
 
 import uuid
 from datetime import datetime
-import importlib
 from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
 from app.models.amenity import Amenity
 from abc import ABC, abstractmethod
+import logging
 
 # Definir el repositorio base
 class Repository(ABC):
@@ -68,11 +68,14 @@ class InMemoryRepository(Repository):
         if obj_id in self._storage:
             del self._storage[obj_id]
 
-    def delete_all(self):
-        confirmation = input("Are you sure you want to delete all items? (y/n): ")
-        if confirmation.lower() == 'y':
-            self._storage.clear()
-            print("All items deleted.")
+        try:
+            deleted = self.model.query.filter_by(id=obj_id).delete()
+            if deleted:
+                self.db.session.commit()
+        except Exception as e:
+            self.db.session.rollback()
+            logging.error(f"Error deleting object: {e}")
+
 
     def get_by_attribute(self, attr_name, attr_value):
         return next((obj for obj in self._storage.values() if getattr(obj, attr_name, None) == attr_value), None)
@@ -90,7 +93,7 @@ class SQLAlchemyRepository(Repository):
             self.db.session.commit()
         except Exception as e:
             self.db.session.rollback()  # Evita cambios no confirmados
-            print(f"Error adding object: {e}")
+            logging.error(f"Error adding object: {e}")
 
     def get(self, obj_id):
         return self.model.query.get(obj_id)
@@ -101,15 +104,17 @@ class SQLAlchemyRepository(Repository):
     def update(self, obj_id, data):
         obj = self.get(obj_id)
         if obj:
-            for key, value in data.items():
-                setattr(obj, key, value)
+            self.model.query.filter_by(id=obj_id).update(data)
             self.db.session.commit()
 
     def delete(self, obj_id):
-        obj = self.get(obj_id)
-        if obj:
-            self.db.session.delete(obj)
-            self.db.session.commit()
+       try:
+            deleted = self.model.query.filter_by(id=obj_id).delete()
+            if deleted:
+                self.db.session.commit() 
+       except Exception as e:
+            self.db.session.rollback()
+            logging.error(f"Error deleting object: {e}")
 
     def get_by_attribute(self, attr_name, attr_value):
         return self.model.query.filter_by(**{attr_name: attr_value}).first()
@@ -142,16 +147,19 @@ class UserRepository(SQLAlchemyRepository):
                 user.email = email
             if is_admin is not None:
                 user.is_admin = is_admin
-            self.update(user_id, user.__dict__)
+            self.db.session.commit()
+            
+
         return user
 
     def delete_user(self, user_id):
-        user = self.get_user_by_id(user_id)
-        if user:
-            self.db.session.delete(user)
-            self.db.session.commit()
-            return True
-        return False  # Indica que el usuario no existía
+        try:
+            deleted = self.model.query.filter_by(id=user_id).delete()
+            if deleted:
+                self.db.session.commit()
+        except Exception as e:
+            self.db.session.rollback()
+            logging.error(f"Error deleting user: {e}")
 
 
 

@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required
 
 # Espacio de nombres para las operaciones de reseñas
 # Namespace for review operations
@@ -16,6 +17,7 @@ review_model = api.model('Review', {
 
 @api.route('/')
 class ReviewList(Resource):
+    @jwt_required()
     @api.expect(review_model)
     @api.response(201, 'Review successfully created / Reseña creada exitosamente')
     @api.response(400, 'Invalid input data / Datos de entrada no válidos')
@@ -61,12 +63,16 @@ class ReviewResource(Resource):
     @api.response(200, 'Review deleted successfully / Reseña eliminada exitosamente')
     @api.response(404, 'Review not found / Reseña no encontrada')
     def delete(self, review_id):
-        """Eliminar una reseña / Delete a review"""
+        """Eliminar una reseña"""
+        review = facade.get_review(review_id)  # Validar existencia antes de eliminar
+        if not review:
+            return {'error': 'Review not found'}, 404
+
         try:
             facade.delete_review(review_id)
             return {'message': 'Review deleted successfully'}, 200
-        except ValueError as e:
-            return {'error': str(e)}, 404
+        except Exception as e:
+            return {'error': str(e)}, 400
 
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):

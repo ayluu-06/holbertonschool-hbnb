@@ -6,14 +6,16 @@ import uuid
 from app.models.base_model import BaseModel
 from email_validator import validate_email, EmailNotValidError
 from sqlalchemy.orm import validates, relationship
+from app import bcrypt
+from app import db
 
 
 class User(BaseModel):
     """Class User, inherits from BaseModel
     Clase User, hereda de BaseModel"""
     __tablename__ = 'users'
-    from app.__init__ import db
-    id = db.Column(db.String(36), primary_key=True)
+   
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
@@ -24,22 +26,20 @@ class User(BaseModel):
     reviews = db.relationship('Review', backref='user', lazy=True, cascade='all, delete-orphan')
 
     def __init__(self, first_name: str, last_name: str, email: str, password: str, is_admin: bool = False):
-        """Initialize User with validated fields
-        Inicializa el Usuario con campos validados"""
+        #Initialize User with valid data
+        #Inicializa el Usuario
 
         super().__init__()
-        self.id = str(uuid.uuid4())
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')  # Encrypt password
-        # Encripta la contraseña
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
         self.is_admin = is_admin
 
     @validates('first_name')
     def validate_first_name(self, key, value):
-        """Ensure first name is valid
-        Asegura que el primer nombre sea válido"""
+        #Ensure first name is valid
+        #Asegura que el primer nombre sea válido
         if not value or len(value) > 50:
             raise ValueError("First name is required and cannot exceed 50 characters")
             # El primer nombre es obligatorio y no puede superar los 50 caracteres
@@ -47,8 +47,8 @@ class User(BaseModel):
 
     @validates('last_name')
     def validate_last_name(self, key, value):
-        """Ensure last name is valid
-        Asegura que el apellido sea válido"""
+        #Ensure last name is valid
+        #Asegura que el apellido sea válido
         if not value or len(value) > 50:
             raise ValueError("Last name is required and cannot exceed 50 characters")
             # El apellido es obligatorio y no puede superar los 50 caracteres
@@ -60,15 +60,20 @@ class User(BaseModel):
         Valida y normaliza el correo electrónico"""
         try:
             email_info = validate_email(value, check_deliverability=False)
-            return email_info.normalized  # Save normalized email
+            return email_info.normalized 
+            # Save normalized email
             # Guarda el correo electrónico normalizado
         except EmailNotValidError as e:
             raise ValueError(f"Invalid email: {e}")
             # Lanza un error si el correo no es válido
-
+    
+    @validates('password')
+    def validate_password(self, key, value):
+        if len(value) < 8:
+            raise ValueError("La contraseña debe tener al menos 8 caracteres")
+        return bcrypt.generate_password_hash(value).decode('utf-8')
+    
     def verify_password(self, password):
         """Check if provided password matches stored password
         Verifica si la contraseña proporcionada coincide con la almacenada"""
-        from app import bcrypt  # Import bcrypt only when needed
-        # Importa bcrypt solo cuando sea necesario
         return bcrypt.check_password_hash(self.password, password)
