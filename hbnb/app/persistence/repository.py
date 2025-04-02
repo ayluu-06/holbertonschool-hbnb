@@ -1,14 +1,15 @@
-from datetime import datetime
+# app/persistence/repository.py
+
 import uuid
-from app import db
+from datetime import datetime
+import importlib
 from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
 from app.models.amenity import Amenity
 from abc import ABC, abstractmethod
-from datetime import datetime
-import uuid
 
+# Definir el repositorio base
 class Repository(ABC):
     @abstractmethod
     def add(self, obj):
@@ -35,6 +36,7 @@ class Repository(ABC):
         pass
 
 
+# Repositorio en memoria (para pruebas o almacenamiento temporal)
 class InMemoryRepository(Repository):
     def __init__(self):
         self._storage = {}
@@ -47,7 +49,7 @@ class InMemoryRepository(Repository):
         if hasattr(obj, "updated_at") and obj.updated_at is None:
             obj.updated_at = datetime.utcnow()
 
-        self._storage[obj.id] = obj  # Guardar el objeto en el almacenamiento en memoria
+        self._storage[obj.id] = obj
 
     def get(self, obj_id):
         return self._storage.get(obj_id)
@@ -58,10 +60,9 @@ class InMemoryRepository(Repository):
     def update(self, obj_id, data):
         obj = self.get(obj_id)
         if obj:
-            # Actualizar todos los atributos del objeto (no solo los predefinidos)
             for key, value in data.items():
                 setattr(obj, key, value)
-            obj.updated_at = datetime.utcnow()  # Actualizar la fecha de modificación
+            obj.updated_at = datetime.utcnow()
 
     def delete(self, obj_id):
         if obj_id in self._storage:
@@ -77,16 +78,15 @@ class InMemoryRepository(Repository):
         return next((obj for obj in self._storage.values() if getattr(obj, attr_name, None) == attr_value), None)
 
 
-    def get_by_id(self, obj_id):
-        return self.get(obj_id)
-
+# Repositorio basado en SQLAlchemy
 class SQLAlchemyRepository(Repository):
-    def __init__(self, model):
+    def __init__(self, model, db_instance):
         self.model = model
+        self.db = db_instance  # Usamos la instancia de db pasada
 
     def add(self, obj):
-        db.session.add(obj)
-        db.session.commit()
+        self.db.session.add(obj)
+        self.db.session.commit()
 
     def get(self, obj_id):
         return self.model.query.get(obj_id)
@@ -99,20 +99,22 @@ class SQLAlchemyRepository(Repository):
         if obj:
             for key, value in data.items():
                 setattr(obj, key, value)
-            db.session.commit()
+            self.db.session.commit()
 
     def delete(self, obj_id):
         obj = self.get(obj_id)
         if obj:
-            db.session.delete(obj)
-            db.session.commit()
+            self.db.session.delete(obj)
+            self.db.session.commit()
 
     def get_by_attribute(self, attr_name, attr_value):
         return self.model.query.filter_by(**{attr_name: attr_value}).first()
 
+
+# Repositorio específico para el modelo de usuario
 class UserRepository(SQLAlchemyRepository):
-    def __init__(self):
-        self.model = User
+    def __init__(self, db_instance):
+        super().__init__(User, db_instance)
 
     def create_user(self, first_name, last_name, email, password, is_admin=False):
         user = self.model(first_name=first_name, last_name=last_name, email=email, password=password, is_admin=is_admin)
@@ -120,10 +122,10 @@ class UserRepository(SQLAlchemyRepository):
         return user
 
     def get_user_by_id(self, user_id):
-        return db.session.query(self.model).filter_by(id=user_id).first()
+        return self.db.session.query(self.model).filter_by(id=user_id).first()
 
     def get_user_by_email(self, email):
-        return db.session.query(self.model).filter_by(email=email).first()
+        return self.db.session.query(self.model).filter_by(email=email).first()
 
     def update_user(self, user_id, first_name=None, last_name=None, email=None, is_admin=None):
         user = self.get_user_by_id(user_id)
@@ -145,20 +147,26 @@ class UserRepository(SQLAlchemyRepository):
             self.delete(user_id)
         return user
 
+
+# Repositorio específico para el modelo de lugar
 class PlaceRepository(SQLAlchemyRepository):
-    def __init__(self):
-        super().__init__(Place)
+    def __init__(self, db_instance):
+        super().__init__(Place, db_instance)
 
     def get_places_by_owner(self, owner_id):
         return self.model.query.filter_by(owner_id=owner_id).all()
 
+
+# Repositorio específico para el modelo de reseña
 class ReviewRepository(SQLAlchemyRepository):
-    def __init__(self):
-        super().__init__(Review)
+    def __init__(self, db_instance):
+        super().__init__(Review, db_instance)
 
     def get_reviews_by_place(self, place_id):
         return self.model.query.filter_by(place_id=place_id).all()
 
+
+# Repositorio específico para el modelo de amenidad
 class AmenityRepository(SQLAlchemyRepository):
-    def __init__(self):
-        super().__init__(Amenity)
+    def __init__(self, db_instance):
+        super().__init__(Amenity, db_instance)

@@ -9,11 +9,12 @@ from app.models.review import Review
 from datetime import datetime
 
 class HBnBFacade:
-    def __init__(self):
-       self.user_repo = UserRepository()
-       self.amenity_repo = SQLAlchemyRepository(Amenity)
-       self.place_repo = SQLAlchemyRepository(Place)
-       self.review_repo = SQLAlchemyRepository(Review)
+    def __init__(self, db_instance):
+       self.db = db_instance
+       self.user_repo = UserRepository(db_instance)
+       self.amenity_repo = SQLAlchemyRepository(Amenity, db_instance)
+       self.place_repo = SQLAlchemyRepository(Place, db_instance)
+       self.review_repo = SQLAlchemyRepository(Review, db_instance)
 # 👨 users
 class UserService:
     

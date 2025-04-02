@@ -5,9 +5,12 @@ from app.models.amenity import Amenity
 
 # Definición de la tabla de relación entre Place y Amenity
 # Relationship table between Place and Amenity
-place_amenity = db.Table('place_amenity',
+place_amenity = db.Table(
+    'place_amenity',
+    db.metadata,
     db.Column('place_id', db.Integer, db.ForeignKey('places.id'), primary_key=True),
-    db.Column('amenity_id', db.Integer, db.ForeignKey('amenities.id'), primary_key=True)
+    db.Column('amenity_id', db.Integer, db.ForeignKey('amenities.id'), primary_key=True),
+    extend_existing=True
 )
 
 class Place(BaseModel):

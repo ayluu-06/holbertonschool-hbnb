@@ -1,5 +1,8 @@
 flask
 flask-restx
+flask-swagger-ui
 flask-bcrypt
+flask-jwt-extended
+email-validator
 sqlalchemy
 flask-sqlalchemy
