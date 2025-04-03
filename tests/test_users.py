@@ -49,7 +49,7 @@ class UserTestCase(unittest.TestCase):
             self.assertIsNotNone(user)
 
     def test_create_user_without_auth(self):
-        """Prueba la creación de usuario sin autenticación"""
+        #Prueba la creación de usuario sin autenticación
         response = self.client.post("/api/v1/users/", json={
             "first_name": "Jane",
             "last_name": "Doe",
