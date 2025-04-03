@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from flask_jwt_extended import create_access_token, jwt_required
 
-api = Namespace('users', description='User operations / Operaciones con usuarios')
+api = Namespace('auth', description='Authentication operations')
 
 # Define the user model for validation and documentation
 # Definir el modelo de usuario para validación y documentación

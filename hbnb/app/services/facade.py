@@ -66,8 +66,16 @@ class UserService:
         return self.user_repo.get_all()
 
     def save(self, user):
-        # Método para guardar el usuario en la base de datos (falta crear el metodo save para guardar a la base de datos)
-        self.user_repo.add(user)
+        # Método para guardar el usuario en la base de datos
+        existing_user = self.user_repo.get_by_attribute("email", user.email)
+        if existing_user:
+            raise ValueError("El usuario ya existe en la base de datos.")
+        try:
+            self.user_repo.add(user)
+            self.user_repo.commit()
+        except Exception as e:
+            self.user_repo.rollback()
+            raise ValueError(f"Error guardando el usuario: {str(e)}")
     
 # 🏨 Amenities
     
@@ -100,11 +108,20 @@ class UserService:
         return amenity
 
     def delete_amenity(self, amenity_id):
+    # Obtener la amenidad antes de eliminarla
         amenity = self.get_amenity(amenity_id)
-        self.amenity_repo.delete(amenity_id)
-        self.db.session.query(Amenity).delete()
-        self.db.session.commit()
-        return {"message": "Amenity deleted successfully"}
+        if not amenity:
+            raise ValueError("Amenity not found.")
+
+        try:
+            # Eliminar la amenidad
+            self.db.session.delete(amenity)
+            self.db.session.commit()
+            return {"message": "Amenity deleted successfully"}
+        except Exception as e:
+            self.db.session.rollback()
+            raise ValueError(f"Error deleting amenity: {str(e)}")
+
 
     def delete_all_amenities(self):
         print("Borrando todos los amenities...")

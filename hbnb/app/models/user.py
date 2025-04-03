@@ -5,9 +5,8 @@
 import uuid
 from app.models.base_model import BaseModel
 from email_validator import validate_email, EmailNotValidError
-from sqlalchemy.orm import validates, relationship
-from app import bcrypt
-from app import db
+from sqlalchemy.orm import validates
+from app import bcrypt, db
 
 
 class User(BaseModel):
