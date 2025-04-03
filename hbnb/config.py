@@ -18,3 +18,15 @@ config = {
     'production': ProductionConfig,  # Configuración para producción
     'default': DevelopmentConfig
 }
+
+class TestingConfig:
+    DEBUG = True
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+config = {
+    "development": DevelopmentConfig,
+    "production": ProductionConfig,
+    "testing": TestingConfig,
+}

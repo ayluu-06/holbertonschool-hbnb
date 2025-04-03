@@ -1,0 +1,48 @@
+# Archivos de Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.sqlite3
+
+# Virtualenv y dependencias
+venv/
+.env
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Archivos de configuración y credenciales sensibles
+config.py
+instance/
+
+# Archivos de bases de datos temporales
+*.db
+development.db
+*.sqlite
+
+# Logs y archivos de depuración
+*.log
+debug.log
+
+# Archivos de caché y compilación
+*.cache
+*.out
+*.bin
+*.o
+*.so
+
+# Archivos generados por IDEs y editores de código
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Carpeta de pruebas y resultados temporales
+tests/__pycache__/
+tests/*.xml
+tests/results/
