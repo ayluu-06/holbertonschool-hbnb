@@ -1,8 +1,10 @@
 import os
 
 class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')  # Asegúrate de tener esta variable de entorno
     DEBUG = False
+    SECRET_KEY = os.environ.get("SECRET_KEY", "valor_por_defecto")
+    DATABASE_URI = os.environ.get("DATABASE_URI", "sqlite:///fallback.db")
+    FLASK_ENV = os.environ.get("FLASK_ENV", "development")
 
 class DevelopmentConfig(Config):
     DEBUG = True
