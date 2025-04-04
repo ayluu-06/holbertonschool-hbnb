@@ -5,13 +5,6 @@
 __pycache__/
 *.sqlite3
 
-# Virtualenv y dependencias
-venv/
-.env
-*.egg-info/
-pip-log.txt
-pip-delete-this-directory.txt
-
 # Archivos de configuración y credenciales sensibles
 config.py
 instance/
