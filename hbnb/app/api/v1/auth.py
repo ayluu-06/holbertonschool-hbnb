@@ -25,8 +25,13 @@ class UserList(Resource):
 
         if not user_data.get('email') or not user_data.get('email').strip():
             return {'error': 'El correo electrónico es obligatorio'}, 400
+        
+        if not user_data.get('password').strip().endswith('@example.com'):
+            return {'error': 'El correo electrónico debe terminar con @example.com'}, 400
+        
         if not user_data.get('first_name') or not user_data.get('first_name').strip():
             return {'error': 'El nombre es obligatorio'}, 400
+        
         if not user_data.get('last_name') or not user_data.get('last_name').strip():
             return {'error': 'El apellido es obligatorio'}, 400
         
@@ -56,3 +61,22 @@ class UserResource(Resource):
             'last_name': user.last_name,
             'email': user.email
         }, 200
+
+login_model = api.model('Login', {
+    'email': fields.String(required=True, description="User's email"),
+    'password': fields.String(required=True, description="User's password")
+})
+
+@api.route('/login')
+class Login(Resource):
+    @api.expect(login_model)
+    def post(self):
+        """Login and return JWT token"""
+        user_data = api.payload
+        user = facade.get_user_by_email(user_data.get("email"))
+
+        if not user or not user.verify_password(user_data.get("password")):
+            return {"error": "Credenciales inválidas"}, 401
+
+        access_token = create_access_token(identity=user.id)
+        return {"access_token": access_token}, 200

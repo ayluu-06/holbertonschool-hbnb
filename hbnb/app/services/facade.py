@@ -15,6 +15,9 @@ class HBnBFacade:
        self.amenity_repo = SQLAlchemyRepository(Amenity, db_instance)
        self.place_repo = SQLAlchemyRepository(Place, db_instance)
        self.review_repo = SQLAlchemyRepository(Review, db_instance)
+
+    
+
 # 👨 users
 class UserService:
     
